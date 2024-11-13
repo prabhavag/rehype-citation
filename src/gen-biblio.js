@@ -7,8 +7,15 @@ import { htmlToHast } from './html-transform-node.js'
  */
 export const genBiblioNode = (citeproc) => {
   const [params, bibBody] = citeproc.makeBibliography()
+
+  // Replace any URLs with <a> tags
+  const linkedBibBody = bibBody.map((entry) => 
+    entry.replace(/(http[s]?:\/\/[^\s<]+)/g, (url) => `<a href="${url}" target="_blank">${url}</a>`)
+  )
+
   const bibliography =
-    '<div id="refs" class="references csl-bib-body">\n' + bibBody.join('') + '</div>'
+    '<div id="refs" class="references csl-bib-body">\n' + linkedBibBody.join('') + '</div>'
+
   const biblioNode = htmlToHast(bibliography)
 
   // Add citekey id to each bibliography entry.
@@ -19,5 +26,6 @@ export const genBiblioNode = (citeproc) => {
       node.properties = node.properties || {}
       node.properties.id = 'bib-' + citekey
     })
+
   return biblioNode
 }
